@@ -70,27 +70,26 @@ namespace CodingTaskApp
             {
                 if (getResultCommand == null)
                 {
-                    getResultCommand = new RelayCommand(GetResult);
+                    getResultCommand = new RelayCommand(x => AddStudentToQueue());
                 }
                 return getResultCommand;
             }
         }
-        private RelayCommand removeResultCommand;
-        public ICommand RemoveResultCommand
+
+        private void AddStudentToQueue()
         {
-            get
+            if (IsAddedStudent())
             {
-                if (removeResultCommand == null)
+                Task.Run(() =>
                 {
-                    removeResultCommand = new RelayCommand(GetResult);
-                }
-                return removeResultCommand;
+                    AddStudent(name, id.Value);
+                });
             }
         }
 
-
-        private void GetResult(object obj)
+        private bool IsAddedStudent()
         {
+            bool result = false;
             try
             {
                 if (string.IsNullOrWhiteSpace(Name) || Id == null )
@@ -104,17 +103,15 @@ namespace CodingTaskApp
                 else
                 {
                     ResultItems.Add(new Student() { ID = id.Value, Name = name, Status = Status.WAITING_FOR_RESULT });
-                    Task.Run(() =>
-                    {
-                        AddStudent(name, id.Value);
-                    });
+                    result = true;
                 }
             }
             catch(Exception ex)
             {
+                Console.WriteLine(ex.Message);
                 MessageBox.Show("Failed to get result. Please try again.");
             }
-           
+            return result;
         }
 
         private void AddStudent(string name, int id)
